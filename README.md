@@ -1,5 +1,21 @@
 # OSX-Keylogger
 
+### Features
+
+* Records the keys you pressed in a log file along with the time
+* Constantly saves the file to ensure no lost data
+* Saves file in an easy format for reading into other applications
+
+##### Features to be added
+
+* For some reason it only saves the a-z, 0-9 keys, punctuation, and whitespace keys. I am working on getting it to save the modifier keys as well as backspace and function keys.
+* Getting rid of that stupid System Preferences bug (see below)
+* Expanding to add the user options such as more control over:
+  * which keys are recorded
+  * format of saved file
+  * format of saved time
+  * Schedule of when to save keys
+  * Easy button to start or stop keylogging
 
 ### Installation
 
