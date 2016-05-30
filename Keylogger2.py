@@ -28,18 +28,20 @@ import time
 
 class AppDelegate(NSObject):
     def applicationDidFinishLaunching_(self, aNotification):
-        mask = (  NSKeyDownMask 
-                | NSKeyUpMask
-                | NSLeftMouseDownMask 
-                | NSLeftMouseUpMask
+        mask = (  NSKeyDownMask
+                | NSLeftMouseDownMask
                 | NSOtherMouseDown
-                | NSOtherMouseUp
                 | NSRightMouseDownMask 
-                | NSRightMouseUpMask
-                | NSMouseMovedMask 
                 | NSScrollWheelMask)
         
-        NSEvent.addGlobalMonitorForEventsMatchingMask_handler_(NSKeyDownMask, handler)
+        NSEvent.addGlobalMonitorForEventsMatchingMask_handler_(mask, handler)
+
+def writeToLogs(log, text):
+    log.write(text)
+    log.write(' PTO ')
+    log.write(time.strftime("%Y %m %d %H %M %S"))
+    log.write('\n')
+
 
 def handler(event):
     flags = event.modifierFlags()
@@ -77,39 +79,38 @@ def handler(event):
     except:
         print("Something happened")
 
-    log = open("/Users/aturley/Desktop/logs.txt", 'a')
+    log = open("/Users/aturley/Desktop/fullLogs.txt", 'a')
+    mouse = open("/Users/aturley/Desktop/mouseLogs.txt", 'a')
+    keyboard = open("/Users/aturley/Desktop/keyLogs.txt", 'a')
     
     for key in arrows:
-        log.write(key)
-        log.write(' PTO ')
-        log.write(time.strftime("%Y %m %d %H %M %S"))
-        log.write('\n')
+        writeToLogs(log, key)
+        writeToLogs(keyboard, key)
 
     for key in modifiers:
-        log.write(key)
-        log.write(' PTO ')
-        log.write(time.strftime("%Y %m %d %H %M %S"))
-        log.write('\n')
+        writeToLogs(log, key)
+        writeToLogs(keyboard, key)
         
-    '''if event.type() in (NSLeftMouseDown, NSOtherMouseDown):
-        log.write("</LEFTMOUSE>")
-        log.write(' PTO ')
-        log.write(time.strftime("%Y %m %d %H %M %S"))
-        log.write('\n')
+    if event.type() == NSLeftMouseDown:
+        writeToLogs(log, "</LEFTMOUSE>")
+        writeToLogs(mouse, "</LEFTMOUSE>")
+        print("LEFTMOUSE")
     elif event.type() == NSRightMouseDown:
-        log.write("</RIGHTMOUSE>")
-        log.write(' PTO ')
-        log.write(time.strftime("%Y %m %d %H %M %S"))
-        log.write('\n')
-    elif event.type() == NSKeyDown: '''               
-    if event.type() == NSKeyDown and keycode.tostring(event.keyCode()) in string.printable:
+        writeToLogs(log, "</RIGHTMOUSE>")
+        writeToLogs(mouse, "</RIGHTMOUSE>")
+        print("RIGHTMOUSE")
+    elif event.type() == NSOtherMouseDown:
+        writeToLogs(log, "</OTHERMOUSE>")
+        writeToLogs(mouse, "</OTHERMOUSE>")
+        print("OTHERMOUSE")
+    elif event.type() == NSKeyDown:
         print(event.charactersIgnoringModifiers())
-        log.write(event.charactersIgnoringModifiers())
-        log.write(' PTO ')
-        log.write(time.strftime("%Y %m %d %H %M %S"))
-        log.write('\n')
+        writeToLogs(log, event.charactersIgnoringModifiers())
+        writeToLogs(keyboard, event.charactersIgnoringModifiers())
 
     log.close()
+    mouse.close()
+    keyboard.close()
     
 def main():
     app = NSApplication.sharedApplication()
