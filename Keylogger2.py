@@ -31,8 +31,7 @@ class AppDelegate(NSObject):
         mask = (  NSKeyDownMask
                 | NSLeftMouseDownMask
                 | NSOtherMouseDown
-                | NSRightMouseDownMask 
-                | NSScrollWheelMask)
+                | NSRightMouseDownMask)
         
         NSEvent.addGlobalMonitorForEventsMatchingMask_handler_(mask, handler)
 
@@ -77,7 +76,7 @@ def handler(event):
         if flags & NSAlphaShiftKeyMask:
             modifiers.append("</ALPHASHIFT>")
     except:
-        print("Something happened")
+        pass
 
     log = open("/Users/aturley/Desktop/fullLogs.txt", 'a')
     mouse = open("/Users/aturley/Desktop/mouseLogs.txt", 'a')
