@@ -28,6 +28,17 @@ import time
 
 class AppDelegate(NSObject):
     def applicationDidFinishLaunching_(self, aNotification):
+        mask = (  NSKeyDownMask 
+                | NSKeyUpMask
+                | NSLeftMouseDownMask 
+                | NSLeftMouseUpMask
+                | NSOtherMouseDown
+                | NSOtherMouseUp
+                | NSRightMouseDownMask 
+                | NSRightMouseUpMask
+                | NSMouseMovedMask 
+                | NSScrollWheelMask)
+        
         NSEvent.addGlobalMonitorForEventsMatchingMask_handler_(NSKeyDownMask, handler)
 
 def handler(event):
@@ -79,7 +90,18 @@ def handler(event):
         log.write(' PTO ')
         log.write(time.strftime("%Y %m %d %H %M %S"))
         log.write('\n')
-    
+        
+    '''if event.type() in (NSLeftMouseDown, NSOtherMouseDown):
+        log.write("</LEFTMOUSE>")
+        log.write(' PTO ')
+        log.write(time.strftime("%Y %m %d %H %M %S"))
+        log.write('\n')
+    elif event.type() == NSRightMouseDown:
+        log.write("</RIGHTMOUSE>")
+        log.write(' PTO ')
+        log.write(time.strftime("%Y %m %d %H %M %S"))
+        log.write('\n')
+    elif event.type() == NSKeyDown: '''               
     if event.type() == NSKeyDown and keycode.tostring(event.keyCode()) in string.printable:
         print(event.charactersIgnoringModifiers())
         log.write(event.charactersIgnoringModifiers())
