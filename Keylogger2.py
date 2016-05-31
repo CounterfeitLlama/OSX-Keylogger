@@ -32,15 +32,103 @@ class AppDelegate(NSObject):
                 | NSLeftMouseDownMask
                 | NSOtherMouseDown
                 | NSRightMouseDownMask)
-        
-        NSEvent.addGlobalMonitorForEventsMatchingMask_handler_(mask, handler)
 
+        mouseMovedMask = (NSMouseMovedMask 
+                        | NSScrollWheelMask)
+        NSEvent.addGlobalMonitorForEventsMatchingMask_handler_(mask, handler)
+        NSEvent.addGlobalMonitorForEventsMatchingMask_handler_(mouseMovedMask, mouseHandler)
+
+    def applicationWillResignActive(self, notification):
+        self.applicationWillTerminate_(notification)
+
+    def applicationShouldTerminate_(self, notification):
+        self.applicationWillTerminate_(notification)
+
+    def applicationWillTerminate_(self, notification):
+        print("Exiting")
+        
 def writeToLogs(log, text):
     log.write(text)
     log.write(' PTO ')
     log.write(time.strftime("%Y %m %d %H %M %S"))
     log.write('\n')
 
+def mouseHandler(event):
+    readLog = open("/Users/aturley/Desktop/mouseStats.txt", 'r').read()
+    readLog = readLog.split('\n')
+
+    try:
+        loc = NSEvent.mouseLocation()
+        if event.type() == NSMouseMoved:
+            disMoved = readLog[0]
+            disMovedX = readLog[1]
+            disMovedY = readLog[2]
+            disMovedPosX = readLog[3]
+            disMovedNegX = readLog[4]
+            disMovedPosY = readLog[5]
+            disMovedNegY = readLog[6]
+            disMovedAve = readLog[7]
+            disMovedAveX = readLog[8]
+            disMovedAveY = readLog[9]
+            mousePrevX = readLog[10]
+            mousePrevY = readLog[11]
+
+            changedX = loc.x - float(mousePrevX)
+            changedY = loc.y - float(mousePrevX)
+            
+            disMoved = float(disMoved) + abs(changedX) + abs(changedY)
+            disMovedX = float(disMovedX) + abs(changedX)
+            disMovedY = float(disMovedY) + abs(changedY)
+            
+            if changedX > 0:
+                disMovedPosX = float(disMovedPosX) + changedX
+            else:
+                disMovedNegX = float(disMovedNegX) + changedX
+                
+            if changedY > 0:
+                disMovedPosY = float(disMovedPosY) + changedY
+            else:
+                disMovedNegY = float(disMovedNegY) + changedY
+
+            disMovedAveX = (float(disMovedPosX) + float(disMovedNegX)) / 2
+            disMovedAveY = (float(disMovedPosY) + float(disMovedNegY)) / 2
+            disMovedAve = (disMovedAveX + disMovedAveY) / 2
+
+            mousePrevX = float(loc.x)
+            mousePrevY = float(loc.y)
+
+            mouseLog = open("/Users/aturley/Desktop/mouseStats.txt", 'w')
+            readLog[0] = str(disMoved)
+            readLog[1] = str(disMovedX)
+            readLog[2] = str(disMovedY)
+            readLog[3] = str(disMovedPosX)
+            readLog[4] = str(disMovedNegX)
+            readLog[5] = str(disMovedPosY)
+            readLog[6] = str(disMovedNegY)
+            readLog[7] = str(disMovedAve)
+            readLog[8] = str(disMovedAveX)
+            readLog[9] = str(disMovedAveY)
+            readLog[10] = str(mousePrevX)
+            readLog[11] = str(mousePrevY)
+            toWrite = "\n".join(readLog)
+            
+            mouseLog.write(toWrite)
+            mouseLog.close()
+            
+        elif event.type() == NSScrollWheelMask:
+            disScrolled = readLog[12]
+            disScrolledX = readLog[13]
+            disScrolledY = readLog[14]
+            disScrolledPosX = readLog[15]
+            disScrolledNegX = readLog[16]
+            disScrolledPosY = readLog[17]
+            disScrolledNegY = readLog[18]
+            disScrolledAve = readLog[19]
+            disScrolledAveX = readLog[20]
+            disScrolledAveY = readLog[21]
+
+    except:
+        pass
 
 def handler(event):
     flags = event.modifierFlags()
