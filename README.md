@@ -3,8 +3,10 @@
 ### Features
 
 * Records the keys you pressed in a log file along with the time
+* Records mouse clicks (both left and right)
 * Constantly saves the file to ensure no lost data
 * Saves file in an easy format for reading into other applications
+* Saves files for keyboard buttons, mouse bottons, and both in three seperate log files
 
 ##### Features to be added
 
