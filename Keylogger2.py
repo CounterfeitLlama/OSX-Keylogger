@@ -35,6 +35,7 @@ class AppDelegate(NSObject):
 
         mouseMovedMask = (NSMouseMovedMask 
                         | NSScrollWheelMask)
+        
         NSEvent.addGlobalMonitorForEventsMatchingMask_handler_(mask, handler)
         NSEvent.addGlobalMonitorForEventsMatchingMask_handler_(mouseMovedMask, mouseHandler)
 
@@ -115,7 +116,7 @@ def mouseHandler(event):
             mouseLog.write(toWrite)
             mouseLog.close()
             
-        elif event.type() == NSScrollWheelMask:
+        elif event.type() == NSScrollWheel:
             disScrolled = readLog[12]
             disScrolledX = readLog[13]
             disScrolledY = readLog[14]
@@ -127,6 +128,42 @@ def mouseHandler(event):
             disScrolledAveX = readLog[20]
             disScrolledAveY = readLog[21]
 
+            deltaY = event.deviceDeltaY()
+            deltaX = event.deviceDeltaX()
+            
+            disScrolledX = float(disScrolledX) + deltaX
+            disScrolledY = float(disScrolledY) + deltaY
+            disScrolled = float(disScrolled) + abs(deltaY) + abs(deltaX)
+
+            if deltaX > 0:
+                disScrolledPosX = float(disScrolledPosX) + deltaX
+            else:
+                disScrolledNegX = float(disScrolledNegX) + deltaX
+
+            if deltaY > 0:
+                disScrolledPosY = float(disScrolledPosY) + deltaY
+            else:
+                disScrolledNegY = float(disScrolledNegY) + deltaY
+
+            disScrolledAveX = (float(disScrolledPosX) + float(disScrolledNegX)) / 2
+            disScrolledAveY = (float(disScrolledPosY) + float(disScrolledNegY)) / 2
+            disScrolledAve = (disScrolledAveX + disScrolledAveY) / 2
+
+            mouseLog = open("/Users/aturley/Desktop/mouseStats.txt", 'w')
+            readLog[12] = str(disScrolled)
+            readLog[13] = str(disScrolledX)
+            readLog[14] = str(disScrolledY)
+            readLog[15] = str(disScrolledPosX)
+            readLog[16] = str(disScrolledNegX)
+            readLog[17] = str(disScrolledPosY)
+            readLog[18] = str(disScrolledNegY)
+            readLog[19] = str(disScrolledAve)
+            readLog[20] = str(disScrolledAveX)
+            readLog[21] = str(disScrolledAveY)
+            toWrite = "\n".join(readLog)
+            
+            mouseLog.write(toWrite)
+            mouseLog.close()
     except:
         pass
 
