@@ -21,23 +21,28 @@ again. Although it might just be me. Who knows.
 from Cocoa import *
 from Foundation import *
 from PyObjCTools import AppHelper
-import keycode
+print("test")
+#import keycode
+print("test2")
 import string
 import sys
 import time
 
 class AppDelegate(NSObject):
-    def applicationDidFinishLaunching_(self, aNotification):
-        mask = (  NSKeyDownMask
-                | NSLeftMouseDownMask
+    def applicationDidFinishLaunching_(self, aNotification): # When the application launches
+        # Set up the different masks to search for
+        keyMask = NSKeyDownMask
+
+        mouseMask = (NSLeftMouseDownMask
                 | NSOtherMouseDown
                 | NSRightMouseDownMask)
 
         mouseMovedMask = (NSMouseMovedMask 
                         | NSScrollWheelMask)
         
-        NSEvent.addGlobalMonitorForEventsMatchingMask_handler_(mask, handler)
-        NSEvent.addGlobalMonitorForEventsMatchingMask_handler_(mouseMovedMask, mouseHandler)
+        NSEvent.addGlobalMonitorForEventsMatchingMask_handler_(keyMask, handler)
+        NSEvent.addGlobalMonitorForEventsMatchingMask_handler_(mouseMask, mouseHandler)
+        NSEvent.addGlobalMonitorForEventsMatchingMask_handler_(mouseMovedMask, mouseMoveHandler)
 
     def applicationWillResignActive(self, notification):
         self.applicationWillTerminate_(notification)
@@ -46,21 +51,30 @@ class AppDelegate(NSObject):
         self.applicationWillTerminate_(notification)
 
     def applicationWillTerminate_(self, notification):
-        print("Exiting")
-        
+        pass
+        #print("Exiting")
+
+'''
+Write data to text files along with the time information
+'''
 def writeToLogs(log, text):
     log.write(text)
     log.write(' PTO ')
     log.write(time.strftime("%Y %m %d %H %M %S"))
     log.write('\n')
 
-def mouseHandler(event):
+'''
+Moving the mouse action
+'''
+def mouseMoveHandler(event):
+    # Open the files and put it into a text format
     readLog = open("/Users/aturley/Desktop/mouseStats.txt", 'r').read()
     readLog = readLog.split('\n')
 
     try:
-        loc = NSEvent.mouseLocation()
-        if event.type() == NSMouseMoved:
+        loc = NSEvent.mouseLocation() # Get location of mouse
+        if event.type() == NSMouseMoved: # If the mouse moved
+            # Setup all of the variables in the log file
             disMoved = readLog[0]
             disMovedX = readLog[1]
             disMovedY = readLog[2]
@@ -71,9 +85,10 @@ def mouseHandler(event):
             disMovedAve = readLog[7]
             disMovedAveX = readLog[8]
             disMovedAveY = readLog[9]
-            mousePrevX = readLog[10]
-            mousePrevY = readLog[11]
+            mousePrevX = readLog[10] # Previous mouse location X
+            mousePrevY = readLog[11] # Previous mouse location Y
 
+            # Change in mouse location for x and y
             changedX = loc.x - float(mousePrevX)
             changedY = loc.y - float(mousePrevX)
             
@@ -81,12 +96,12 @@ def mouseHandler(event):
             disMovedX = float(disMovedX) + abs(changedX)
             disMovedY = float(disMovedY) + abs(changedY)
             
-            if changedX > 0:
+            if changedX > 0: # If there was a positive change for X
                 disMovedPosX = float(disMovedPosX) + changedX
             else:
                 disMovedNegX = float(disMovedNegX) + changedX
                 
-            if changedY > 0:
+            if changedY > 0: # If there was a positive change for Y
                 disMovedPosY = float(disMovedPosY) + changedY
             else:
                 disMovedNegY = float(disMovedNegY) + changedY
@@ -98,6 +113,7 @@ def mouseHandler(event):
             mousePrevX = float(loc.x)
             mousePrevY = float(loc.y)
 
+            # Write the changes in mouse location to the file
             mouseLog = open("/Users/aturley/Desktop/mouseStats.txt", 'w')
             readLog[0] = str(disMoved)
             readLog[1] = str(disMovedX)
@@ -116,7 +132,8 @@ def mouseHandler(event):
             mouseLog.write(toWrite)
             mouseLog.close()
             
-        elif event.type() == NSScrollWheel:
+        elif event.type() == NSScrollWheel: # If the scrollwheel moved instead
+            # Read log information
             disScrolled = readLog[12]
             disScrolledX = readLog[13]
             disScrolledY = readLog[14]
@@ -128,6 +145,7 @@ def mouseHandler(event):
             disScrolledAveX = readLog[20]
             disScrolledAveY = readLog[21]
 
+            # Get change in scroll location for x and y
             deltaY = event.deviceDeltaY()
             deltaX = event.deviceDeltaX()
             
@@ -135,12 +153,12 @@ def mouseHandler(event):
             disScrolledY = float(disScrolledY) + deltaY
             disScrolled = float(disScrolled) + abs(deltaY) + abs(deltaX)
 
-            if deltaX > 0:
+            if deltaX > 0: # If scrolled in a positive X direction
                 disScrolledPosX = float(disScrolledPosX) + deltaX
             else:
                 disScrolledNegX = float(disScrolledNegX) + deltaX
 
-            if deltaY > 0:
+            if deltaY > 0: # If scrolled in a positive Y direction
                 disScrolledPosY = float(disScrolledPosY) + deltaY
             else:
                 disScrolledNegY = float(disScrolledNegY) + deltaY
@@ -149,6 +167,7 @@ def mouseHandler(event):
             disScrolledAveY = (float(disScrolledPosY) + float(disScrolledNegY)) / 2
             disScrolledAve = (disScrolledAveX + disScrolledAveY) / 2
 
+            # Write scrollwheel changes
             mouseLog = open("/Users/aturley/Desktop/mouseStats.txt", 'w')
             readLog[12] = str(disScrolled)
             readLog[13] = str(disScrolledX)
@@ -167,13 +186,40 @@ def mouseHandler(event):
     except:
         pass
 
+'''
+Mouse buttons handler
+'''
+def mouseHandler(event):
+    mouse = open("/Users/aturley/Desktop/mouseLogs.txt", 'a')
+    log = open("/Users/aturley/Desktop/fullLogs.txt", 'a')
+    
+    if event.type() == NSLeftMouseDown: # If the left button was pressed
+        writeToLogs(log, "</LEFTMOUSE>")
+        writeToLogs(mouse, "</LEFTMOUSE>")
+        #print("LEFTMOUSE")
+    elif event.type() == NSRightMouseDown: # If the right button was pressed
+        writeToLogs(log, "</RIGHTMOUSE>")
+        writeToLogs(mouse, "</RIGHTMOUSE>")
+        #print("RIGHTMOUSE")
+    elif event.type() == NSOtherMouseDown: # ???????
+        writeToLogs(log, "</OTHERMOUSE>")
+        writeToLogs(mouse, "</OTHERMOUSE>")
+        #print("OTHERMOUSE")
+        
+    log.close()
+    mouse.close()
+
+
+'''
+Keyboard buttons handler
+'''
 def handler(event):
-    flags = event.modifierFlags()
+    flags = event.modifierFlags() # All of the modifiers that were pressed
     modifiers = []
     arrows = []
 
     try:
-        s = event.charactersIgnoringModifiers()
+        s = event.charactersIgnoringModifiers() # Get misc. keys
         arrowPressed = False
         if s == NSUpArrowFunctionKey:
             arrows.append("</UP>")
@@ -196,7 +242,7 @@ def handler(event):
             modifiers.append("</ALTERNATE>")
         if flags & NSCommandKeyMask:
             modifiers.append("</COMMAND>")
-        if flags & NSFunctionKeyMask and not arrowPressed:
+        if flags & NSFunctionKeyMask and not arrowPressed: # ?????
             modifiers.append("</FUNCTION>")
         if flags & NSAlphaShiftKeyMask:
             modifiers.append("</ALPHASHIFT>")
@@ -204,42 +250,29 @@ def handler(event):
         pass
 
     log = open("/Users/aturley/Desktop/fullLogs.txt", 'a')
-    mouse = open("/Users/aturley/Desktop/mouseLogs.txt", 'a')
     keyboard = open("/Users/aturley/Desktop/keyLogs.txt", 'a')
     
-    for key in arrows:
+    for key in arrows: # Write arrow keys to log
         writeToLogs(log, key)
         writeToLogs(keyboard, key)
 
-    for key in modifiers:
+    for key in modifiers: # Write modifier keys to log
         writeToLogs(log, key)
         writeToLogs(keyboard, key)
         
-    if event.type() == NSLeftMouseDown:
-        writeToLogs(log, "</LEFTMOUSE>")
-        writeToLogs(mouse, "</LEFTMOUSE>")
-        print("LEFTMOUSE")
-    elif event.type() == NSRightMouseDown:
-        writeToLogs(log, "</RIGHTMOUSE>")
-        writeToLogs(mouse, "</RIGHTMOUSE>")
-        print("RIGHTMOUSE")
-    elif event.type() == NSOtherMouseDown:
-        writeToLogs(log, "</OTHERMOUSE>")
-        writeToLogs(mouse, "</OTHERMOUSE>")
-        print("OTHERMOUSE")
-    elif event.type() == NSKeyDown:
-        print(event.charactersIgnoringModifiers())
+    if event.type() == NSKeyDown: # Write normal ASCII keys to log
+        #print(event.charactersIgnoringModifiers())
         writeToLogs(log, event.charactersIgnoringModifiers())
         writeToLogs(keyboard, event.charactersIgnoringModifiers())
 
     log.close()
-    mouse.close()
     keyboard.close()
     
 def main():
-    app = NSApplication.sharedApplication()
+    print("TEST2")
+    app = NSApplication.sharedApplication() # Set up application stuff
     delegate = AppDelegate.alloc().init()
     NSApp().setDelegate_(delegate)
     AppHelper.runEventLoop()
-    
+
 main()
